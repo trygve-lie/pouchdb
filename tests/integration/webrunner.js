@@ -22,6 +22,29 @@ if (preferredAdapters) {
   });
 }
 
+// Capture logs for selenium output
+var logs = [];
+
+(function(){
+
+  var oldLog = console.log;
+  console.log = function() {
+    var args = Array.prototype.slice.call(arguments);
+    args.unshift('log');
+    logs.push(args);
+    oldLog.apply(console, arguments);
+  };
+
+  var oldError = console.error;
+  console.error = function() {
+    var args = Array.prototype.slice.call(arguments);
+    args.unshift('error');
+    logs.push(args);
+    oldError.apply(console, arguments);
+  };
+
+})();
+
 // Thanks to http://engineeredweb.com/blog/simple-async-javascript-loader/
 function asyncLoadScript(url, callback) {
 
@@ -90,6 +113,7 @@ function startTests() {
     });
 
     runner.on('fail', function (e) {
+      window.results.logs = logs;
       window.results.failed++;
       window.results.failures.push({
         title: e.title,
